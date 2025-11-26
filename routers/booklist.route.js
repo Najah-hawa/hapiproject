@@ -1,8 +1,5 @@
-const { server } = require("@hapi/hapi");
-const Booklist  = require ("../models/booklist.model.js");
+const booklistController = require ("../controllers/booklist.controller")
 const Joi = require("joi");
-
-
 module.exports = (server) =>{
     
     //definera router
@@ -10,33 +7,13 @@ module.exports = (server) =>{
         //hämta ut alla data
         method: 'GET',   
         path: '/booklist',
-        handler: async (request, h)  => {
-            try {
-                return await Booklist.find();
-            }catch(error){
-                return h.response("There was an error" + error).code(500);
-            }
-        }
+        handler: booklistController.getAllBooklist
     },
     {
         //hämta ut en en rad från tabellen passerat på ett givet värde  från url
         method: 'GET',
         path: '/booklist/{title}', // vi anger id i URL:en
-        handler: async (request, h) => {
-        const booklistTitle = request.params.title;
-
-            try {
-            const booklistTitle = await Booklist.findOne({ title: booklistTitle });
-
-            if (!booklist) {
-                return h.response("Booklist not found").code(404);
-              }
- 
-               return booklist; // skickar tillbaka produkten som JSON
-           } catch (error) {
-               return h.response("There was an error: " + error).code(500);
-           }
-        }
+        handler: booklistController.getBookByTitle
     },
     {
         // lägg till data i tabellen
@@ -57,14 +34,7 @@ module.exports = (server) =>{
             }
         }
     },
-        handler: async (request, h)  => {
-            try {
-                const booklist = new Booklist(request.payload);
-                return await booklist.save();
-            }catch(error){
-                return h.response("There was an error" + error).code(500);
-            }
-        }
+        handler: booklistController.addBook
     },
     {
         //Uppdatera data för en rad med ett givet id.
@@ -83,45 +53,13 @@ module.exports = (server) =>{
             }
         }
          },
-        handler: async (request, h) => {
-        const booklistTitle = request.params.title; //sparar värdet vi fått från url 
-        const updateData = request.payload; // det vi vill uppdatera
-
-        try {
-            const updatedBooklist = await Booklist.findOneAndUpdate(
-                { title: booklistTitle },   // hitta produkten
-                updateData,              // uppdatera med nya värden
-                { new: true }            // returnera den uppdaterade produkten
-            );
-
-            if (!updatedBooklist) {
-                return h.response("Booklist not found").code(404);
-            }
-
-            return updatedBooklist;
-        } catch (error) {
-            return h.response("There was an error: " + error).code(500);
-        }
-    }
+        handler: booklistController.updateBook
     }, 
     {
         //radera en rad i tabellen med ett givet id
         method: 'DELETE',
         path: '/booklist/{title}',
-        handler: async (request, h) => {
-        const booklistTitle = request.params.title;
-
-        try {
-            const deletedBooklist = await Booklist.findOneAndDelete({ title: booklistTitle });
-
-            if (!deletedBooklist) {
-                return h.response("Booklist not found").code(404);
-            }
-            return h.response("Booklist deleted successfully").code(200);
-        } catch (error) {
-            return h.response("There was an error: " + error).code(500);
-        }
-    }
+        handler: booklistController.deleteBook
 }
 
 ])
