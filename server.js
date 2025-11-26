@@ -1,8 +1,8 @@
+'use strict';
 
 const Hapi = require('@hapi/hapi');
 const mongoose = require("mongoose");
 require("dotenv").config();
-
 
 const init = async () => {
 
@@ -11,53 +11,21 @@ const init = async () => {
         host: 'localhost'
     });
 
-        //connect to Mongodb
+     //connect to Mongodb
     mongoose.connect(process.env.DATABASE).then(() => {
         console.log("Coonected to MongoDb");
     }).catch((error) => {
         console.error("error connecting to database:" + error);
     });
-     
+    
 
-       //Model 
-    const Booklist = mongoose.model("Booklist", {
-        isbn:String, 
-        title: String, 
-        author: String, 
-        year: Number,
-        readStatus:Boolean
-
-    })
+    
+    require("./routers/booklist.route") (server);
 
 
-    server.route([{ 
-        //hämta ut alla data
-        method: 'GET',   
-        path: '/booklist',
-        handler: async (request, h)  => {
-            try {
-                return await Booklist.find();
-            }catch(error){
-                return h.response("There was an error" + error).code(500);
-            }
-        }
-    },{ 
-        //hämta ut alla data
-        method: 'POST',
-        path: '/booklist',
-        handler: async (request, h)  => {
-            try {
-                const booklist = new Booklist(request.payload);
-                return await booklist.save();
-            }catch(error){
-                return h.response("There was an error" + error).code(500);
-            }
-        }
-    }
-]);
-
+    // Start the server
     await server.start();
-    console.log('Server running on %s', server.info.uri);
+    console.log('Server running at:', server.info.uri);
 };
 
 process.on('unhandledRejection', (err) => {
