@@ -8,15 +8,22 @@ const init = async () => {
 
     const server = Hapi.server({
         port: 5000,
-        host: 'localhost'
+        host: 'localhost',
+        routes: {
+        cors: {
+            origin: ['*'] // Detta tillåter Vue-appen att prata med API
+        }
+    }
     });
 
-     //connect to Mongodb
-    mongoose.connect(process.env.DATABASE).then(() => {
-        console.log("Coonected to MongoDb");
-    }).catch((error) => {
-        console.error("error connecting to database:" + error);
-    });
+  // Vänta på att Mongoose faktiskt ansluter innan vi går vidare
+    try {
+        await mongoose.connect(process.env.DATABASE);
+        console.log("Connected to MongoDB");
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        process.exit(1); // Stoppa om vi inte får kontakt med databasen
+    }
     
 
     
